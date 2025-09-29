@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Ram</title>
+    
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar glass-panel">
+            <h1>🚀 Online Ram</h1>
+            <div class="controls">
+                <div class="control-row">
+                    <label><strong>ช่วงเวลาปัจจุบัน:</strong></label>
+                    <label>Start: <input type="date" id="startDate" /></label>
+                    <label>End: <input type="date" id="endDate" /></label>
+                </div>
+                <div class="control-row">
+                    <label><input type="checkbox" id="compareToggle"> <strong>เปรียบเทียบ</strong></label>
+                    <div id="compareControls" class="control-row">
+                         <label>Start: <input type="date" id="compareStartDate" /></label>
+                         <label>End: <input type="date" id="compareEndDate" /></label>
+                    </div>
+                </div>
+                 <div class="control-row" style="justify-content: flex-end;">
+                     <button class="btn" id="refreshBtn">รีเฟรช / คำนวณ</button>
+                 </div>
+            </div>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>กำลังดึงข้อมูล...</p>
+        </div>
+        
+        <div class="section-header"><h2>🎯 Marketing Funnel Overview</h2></div>
+        <div class="stats-grid" id="funnelStatsGrid"></div>
+
+        <div class="section-header" style="margin-top: 40px;"><h2>📊 Marketing Performance</h2></div>
+        <div class="stats-grid" id="adsStatsGrid"></div>
+        <div class="glass-panel">
+            <h2 class="chart-title">💰 Daily Ad Spend</h2>
+            <div class="chart-wrapper-large">
+                <canvas id="dailySpendChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-panel top-categories-table scrollable-table">
+            <div class="table-header">
+                <h2 class="chart-title">📋 Campaign Details</h2>
+                <input type="text" id="campaignSearchInput" class="search-input" placeholder="ค้นหาแคมเปญ...">
+            </div>
+            <table>
+                <thead id="campaignsTableHeader">
+                    <tr>
+                        <th><a href="#" class="sort-link" data-sort="name">Campaign Name <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="status">Status <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="spend">Spend (THB) <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="impressions">Impressions <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="purchases">Purchases <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="messaging_conversations">Messaging Conv. <span class="sort-indicator"></span></a></th>
+                        <th><a href="#" class="sort-link" data-sort="cpm">CPM <span class="sort-indicator"></span></a></th>
+                    </tr>
+                </thead>
+                <tbody id="campaignsTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section-header" style="margin-top: 40px;"><h2>💰 Sales Performance</h2></div>
+        <div class="stats-grid" id="salesOverviewStatsGrid"></div>
+        <div class="stats-grid" id="salesRevenueStatsGrid"></div>
+        <h2 class="chart-title">📊 Leads & Bill Summary</h2>
+        <div class="stats-grid" id="salesBillStatsGrid"></div>
+        <div class="grid-2-cols glass-panel">
+            <div class="chart-container">
+                <div class="chart-title">Sales by Type</div>
+                <div class="chart-wrapper-small"><canvas id="revenueChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Customer Type</div>
+                <div class="chart-wrapper-small"><canvas id="customerChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="glass-panel top-categories-table">
+            <h2 class="chart-title">📡 ตารางสรุปช่องทางการติดต่อ</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ช่องทาง</th>
+                        <th>จำนวนบิล P1</th>
+                        <th>P2 Leads</th>
+                        <th>จำนวนบิล UP P2</th>
+                        <th>ลูกค้าใหม่</th>
+                        <th>ยอดขาย</th>
+                    </tr>
+                </thead>
+                <tbody id="channelTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section-header" style="margin-top: 40px;">
+            <h2>📊 Revenue by Category</h2>
+        </div>
+        <div class="glass-panel">
+            <div class="chart-wrapper-large">
+                <canvas id="categoryRevenueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-panel top-categories-table scrollable-table" style="margin-top: 22px;">
+            <h2 class="chart-title">📋 Detailed Category Performance</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 20px;">
+                คลิกที่ตัวเลขเพื่อดูรายละเอียดธุรกรรมของแต่ละหมวดหมู่
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="rank-column">Rank</th>
+                        <th>Category</th>
+                        <th>P1 Bills</th>
+                        <th>UP P1 Bills</th>
+                        <th>UP P2 Bills</th>
+                        <th>New Customers</th>
+                        <th>Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryDetailTableBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="glass-panel top-categories-table scrollable-table">
+            <h2 class="chart-title">🔁 P1 to UP P1 Upsell Flow Analysis</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 20px;">
+                ตารางนี้แสดงว่าลูกค้าที่ซื้อสินค้า/บริการในหมวดหมู่ P1 (From) ได้อัปเกรดไปซื้ออะไรต่อในหมวดหมู่ UP P1 (To) และสร้างรายได้เท่าไหร่จากการอัปเกรดนั้น
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>From (P1 Category)</th>
+                        <th>To (UP P1 Category)</th>
+                        <th># of Upsells</th>
+                        <th>Total UP P1 Revenue</th>
+                        <th>รายละเอียด</th>
+                    </tr>
+                </thead>
+                <tbody id="upsellPathsTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="detailsModal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2 id="modalTitle">Details</h2>
+                <input type="text" id="adSearchInput" class="search-input" placeholder="ค้นหา..." style="display: none;">
+                <span class="modal-close-btn">&times;</span>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
