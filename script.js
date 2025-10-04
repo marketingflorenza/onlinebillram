@@ -116,6 +116,9 @@ async function fetchAdsData(startDate, endDate) {
 }
 
 async function fetchSalesData() {
+    // <<< FIXED: Always clear cache to ensure correct sheet data is loaded for each branch
+    allSalesDataCache = []; 
+
     if (allSalesDataCache.length > 0) return allSalesDataCache;
     const sheetUrl = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${CONFIG.SHEET_NAME_SUMMARY}`;
     const response = await fetch(sheetUrl);
@@ -279,7 +282,9 @@ function processSalesDataForPeriod(allSalesRows, startDate, endDate) {
             channelBreakdown[channel].revenue += rowRevenue;
         }
     });
-    summary.totalCustomers = summary.newCustomers + summary.oldCustomers;
+
+    // <<< FIXED: Updated Total Customers calculation to match previous logic
+    summary.totalCustomers = summary.p1Bills + summary.upP2Bills;
     
     const linkedRows = linkP1AndUpP1(filteredRows);
     const upsellPaths = calculateUpsellPaths(linkedRows);
@@ -528,7 +533,8 @@ function renderCampaignsTable(campaigns) {
 
 function renderCategoryChart(categoryData) {
     const chart = charts.categoryRevenue;
-    const topData = categoryData.slice(0, 15);
+    // <<< FIXED: Re-added .reverse() to show #1 at the top of the horizontal chart
+    const topData = categoryData.slice(0, 15).reverse();
     chart.data.labels = topData.map(d => d.name);
     chart.data.datasets[0].data = topData.map(d => d.totalRevenue);
     chart.update();
@@ -837,7 +843,7 @@ function renderPopupAds(ads) {
         ui.modalBody.innerHTML = `<p style="text-align: center; grid-column: 1 / -1;">No ads found for this campaign.</p>`;
     } else {
         ui.modalBody.innerHTML = ads
-            .sort((a,b) => (b.insights.spend || 0) - (a.insights.spend || 0))
+            .sort((a,b) => (b.insights?.spend || 0) - (a.insights?.spend || 0))
             .map(ad => {
                 const insights = ad.insights || { spend: 0, impressions: 0, purchases: 0, messaging_conversations: 0, cpm: 0 };
                 return `
@@ -975,7 +981,8 @@ async function main() {
         renderUpsellPaths(salesData.upsellPaths);
         
         if (adsResponse.data.dailySpend) {
-            charts.dailySpend.data.labels = adsResponse.data.dailySpend.map(d => `${new Date(d.date).getUTCDate()}/${new Date(d.date).getUTCMonth() + 1}`);
+            // <<< FIXED: Use local date methods to prevent timezone issues
+            charts.dailySpend.data.labels = adsResponse.data.dailySpend.map(d => `${new Date(d.date).getDate()}/${new Date(d.date).getMonth() + 1}`);
             charts.dailySpend.data.datasets[0].data = adsResponse.data.dailySpend.map(d => d.spend);
             charts.dailySpend.update();
         }
