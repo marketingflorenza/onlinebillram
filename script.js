@@ -68,7 +68,7 @@ async function fetchAdsData(startDate, endDate) {
     const since = startDate.split('-').reverse().join('-');
     const until = endDate.split('-').reverse().join('-');
     try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}?since=${since}&until=${until}`);
+        const response = await fetch(`${CONFIG.API_BASE_URL}/databillRam?since=${since}&until=${until}`);
         if (!response.ok) throw new Error('Ads API Error');
         return await response.json();
     } catch (error) {
